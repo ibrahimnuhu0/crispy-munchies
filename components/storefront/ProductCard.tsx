@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Product } from "../../app/generated/prisma/client";
 import { FreshBadge } from "./FreshBadge";
+import { AddToCartButton } from "./AddToCartButton";
 
 export function ProductCard({ product }: { product: Product }) {
   const isLow = product.stock > 0 && product.stock <= 10;
@@ -52,14 +53,14 @@ export function ProductCard({ product }: { product: Product }) {
         )}
       </div>
 
-      <button
-        type="button"
-        disabled
-        title="Cart coming in the next step"
-        className="mt-4 w-full rounded-full border border-gold/40 py-2.5 font-mono text-xs font-semibold uppercase tracking-wide text-gold transition hover:bg-gold hover:text-roast disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        Add to cart
-      </button>
+      <AddToCartButton
+        productId={product.id}
+        name={product.name}
+        packSize={product.packSize}
+        price={product.price}
+        imageUrl={product.imageUrl}
+        stock={product.stock}
+      />
     </div>
   );
 }
