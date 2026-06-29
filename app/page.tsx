@@ -4,6 +4,7 @@ import { ProductCard } from "../components/storefront/ProductCard";
 import { WhatsAppButton } from "../components/storefront/WhatsAppButton";
 import { FreshBadge } from "../components/storefront/FreshBadge";
 import { CartButton } from "../components/storefront/CartButton";
+import { CartDrawer } from "../components/storefront/CartDrawer";
 
 export default async function HomePage() {
   const products = await prisma.product.findMany({
@@ -86,6 +87,7 @@ export default async function HomePage() {
 
       <WhatsAppButton />
       <CartButton />
+      <CartDrawer />
     </main>
   );
 }
