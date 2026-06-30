@@ -28,7 +28,6 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Look up the delivery fee whenever state or city changes
   useEffect(() => {
     if (!form.state) {
       setDeliveryFee(null);
@@ -64,8 +63,47 @@ export default function CheckoutPage() {
     }
 
     setSubmitting(true);
-    console.log("Would submit:", { ...form, items, subtotal, deliveryFee, total });
-    setSubmitting(false);
+
+    try {
+      const orderRes = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          items: items.map((i) => ({
+            productId: i.productId,
+            quantity: i.quantity,
+          })),
+        }),
+      });
+
+      const orderData = await orderRes.json();
+
+      if (!orderRes.ok) {
+        setError(orderData.error ?? "Could not place order. Please try again.");
+        setSubmitting(false);
+        return;
+      }
+
+      const payRes = await fetch("/api/paystack/initialize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: orderData.orderId }),
+      });
+
+      const payData = await payRes.json();
+
+      if (!payRes.ok) {
+        setError(payData.error ?? "Could not start payment. Please try again.");
+        setSubmitting(false);
+        return;
+      }
+
+      window.location.href = payData.authorization_url;
+    } catch {
+      setError("Something went wrong. Please check your connection and try again.");
+      setSubmitting(false);
+    }
   }
 
   if (items.length === 0) {
