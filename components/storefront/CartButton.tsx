@@ -10,10 +10,11 @@ export function CartButton() {
     <button
       type="button"
       onClick={toggleCart}
+      aria-label="Open cart"
       className="fixed right-6 top-6 z-50 flex items-center gap-2 rounded-full bg-surface px-4 py-2.5 font-mono text-xs font-semibold uppercase tracking-wide text-cream shadow-lg transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
     >
       <span aria-hidden>🛒</span>
-      Cart
+      <span className="hidden sm:inline">Cart</span>
       {count > 0 && (
         <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-gold px-1 text-[10px] text-roast">
           {count}

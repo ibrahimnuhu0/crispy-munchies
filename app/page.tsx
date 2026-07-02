@@ -19,7 +19,7 @@ export default async function HomePage() {
         <div className="mx-auto flex max-w-6xl flex-col items-start gap-10 md:flex-row md:items-center md:justify-between">
           <div className="max-w-xl">
             <FreshBadge size="lg" className="mb-6" />
-            <h1 className="font-display text-5xl font-bold leading-[1.05] text-cream md:text-7xl">
+            <h1 className="font-display text-4xl font-bold leading-[1.05] text-cream sm:text-5xl md:text-7xl">
               Fresh, crunchy plantain chips always.
             </h1>
             <p className="mt-5 max-w-md font-sans text-base text-cream/80 md:text-lg">

@@ -28,6 +28,7 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Look up the delivery fee whenever state or city changes
   useEffect(() => {
     if (!form.state) {
       setDeliveryFee(null);
@@ -65,6 +66,7 @@ export default function CheckoutPage() {
     setSubmitting(true);
 
     try {
+      // Step 1: create the pending order in our database
       const orderRes = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -99,6 +101,10 @@ export default function CheckoutPage() {
         return;
       }
 
+      // Step 3: send the customer to Paystack's hosted payment page.
+      // We deliberately do NOT clear the cart here — it only clears once
+      // payment is confirmed, on the order-confirmation page. If the
+      // customer abandons payment, their cart is still waiting for them.
       window.location.href = payData.authorization_url;
     } catch {
       setError("Something went wrong. Please check your connection and try again.");
@@ -122,17 +128,71 @@ export default function CheckoutPage() {
 
   return (
     <main className="min-h-screen bg-roast px-6 py-16 text-cream md:px-12">
-      <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-[1.2fr_1fr]">
-        {/* Form */}
-        <section>
-          <h1 className="font-display text-3xl font-bold text-cream md:text-4xl">
-            Checkout
-          </h1>
-          <p className="mt-2 font-sans text-sm text-cream/60">
-            No account needed — just your delivery details.
-          </p>
+      <div className="mx-auto max-w-5xl">
+        <h1 className="font-display text-3xl font-bold text-cream md:text-4xl">
+          Checkout
+        </h1>
+        <p className="mt-2 font-sans text-sm text-cream/60">
+          No account needed — just your delivery details.
+        </p>
 
-          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+        <div className="mt-8 flex flex-col gap-10 md:flex-row-reverse md:items-start">
+          {/* Order summary — appears first on mobile */}
+          <aside className="w-full shrink-0 rounded-2xl bg-surface p-6 md:w-80">
+            <h2 className="font-display text-xl font-semibold text-cream">
+              Order summary
+            </h2>
+            <div className="mt-5 space-y-3">
+              {items.map((item) => (
+                <div key={item.productId} className="flex items-center gap-3">
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-roast/40">
+                    {item.imageUrl && (
+                      <Image
+                        src={item.imageUrl}
+                        alt={item.name}
+                        fill
+                        sizes="48px"
+                        className="object-cover"
+                      />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-sans text-sm text-cream">{item.name}</p>
+                    <p className="font-mono text-xs text-cream/50">
+                      Qty {item.quantity}
+                    </p>
+                  </div>
+                  <span className="font-mono text-sm text-cream">
+                    ₦{(item.price * item.quantity).toLocaleString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 space-y-2 border-t border-cream/10 pt-4 font-mono text-sm">
+              <div className="flex justify-between text-cream/70">
+                <span>Subtotal</span>
+                <span>₦{subtotal.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-cream/70">
+                <span>Delivery fee</span>
+                <span>
+                  {!form.state
+                    ? "Select a state"
+                    : feeLoading
+                    ? "Calculating..."
+                    : `₦${(deliveryFee ?? 0).toLocaleString()}`}
+                </span>
+              </div>
+              <div className="flex justify-between border-t border-cream/10 pt-2 text-base font-semibold text-gold">
+                <span>Total</span>
+                <span>₦{total.toLocaleString()}</span>
+              </div>
+            </div>
+          </aside>
+
+          {/* Form */}
+          <section className="flex-1">
+            <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label
                 htmlFor="customerName"
@@ -189,7 +249,7 @@ export default function CheckoutPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label
                   htmlFor="state"
@@ -246,61 +306,7 @@ export default function CheckoutPage() {
             </button>
           </form>
         </section>
-
-        {/* Order summary */}
-        <section className="rounded-2xl bg-surface p-6">
-          <h2 className="font-display text-xl font-semibold text-cream">
-            Order summary
-          </h2>
-
-          <div className="mt-5 space-y-3">
-            {items.map((item) => (
-              <div key={item.productId} className="flex items-center gap-3">
-                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-roast/40">
-                  {item.imageUrl && (
-                    <Image
-                      src={item.imageUrl}
-                      alt={item.name}
-                      fill
-                      sizes="48px"
-                      className="object-cover"
-                    />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <p className="font-sans text-sm text-cream">{item.name}</p>
-                  <p className="font-mono text-xs text-cream/50">
-                    Qty {item.quantity}
-                  </p>
-                </div>
-                <span className="font-mono text-sm text-cream">
-                  ₦{(item.price * item.quantity).toLocaleString()}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-6 space-y-2 border-t border-cream/10 pt-4 font-mono text-sm">
-            <div className="flex justify-between text-cream/70">
-              <span>Subtotal</span>
-              <span>₦{subtotal.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between text-cream/70">
-              <span>Delivery fee</span>
-              <span>
-                {!form.state
-                  ? "Select a state"
-                  : feeLoading
-                  ? "Calculating..."
-                  : `₦${(deliveryFee ?? 0).toLocaleString()}`}
-              </span>
-            </div>
-            <div className="flex justify-between border-t border-cream/10 pt-2 text-base font-semibold text-gold">
-              <span>Total</span>
-              <span>₦{total.toLocaleString()}</span>
-            </div>
-          </div>
-        </section>
+        </div>
       </div>
     </main>
   );
