@@ -1,5 +1,6 @@
 import { prisma } from "../../../../lib/prisma";
 import { ProductStockEditor } from "../../../../components/admin/ProductStockEditor";
+import Link from "next/link";
 
 export default async function AdminProductsPage() {
   const products = await prisma.product.findMany({
@@ -8,13 +9,21 @@ export default async function AdminProductsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-3xl font-bold text-cream">
-          Products
-        </h1>
-        <p className="mt-1 font-sans text-sm text-cream/60">
-          Manage stock and availability
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-3xl font-bold text-cream">
+            Products
+          </h1>
+          <p className="mt-1 font-sans text-sm text-cream/60">
+            Manage stock and availability
+          </p>
+        </div>
+        <Link
+          href="/admin/products/new"
+          className="rounded-full bg-gold px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wide text-roast transition hover:brightness-110"
+        >
+          + New product
+        </Link>
       </div>
 
       <div className="space-y-4">
@@ -33,27 +42,35 @@ export default async function AdminProductsPage() {
                 </p>
               </div>
 
-              <div className="text-right">
-                <span
-                  className={`inline-block rounded-full px-3 py-1 font-mono text-xs uppercase tracking-widest ${
-                    product.isAvailable
-                      ? "bg-green/15 text-green"
-                      : "bg-red-500/15 text-red-400"
-                  }`}
+              <div className="flex items-start gap-4">
+                <div className="text-right">
+                  <span
+                    className={`inline-block rounded-full px-3 py-1 font-mono text-xs uppercase tracking-widest ${
+                      product.isAvailable
+                        ? "bg-green/15 text-green"
+                        : "bg-red-500/15 text-red-400"
+                    }`}
+                  >
+                    {product.isAvailable ? "Available" : "Hidden"}
+                  </span>
+                  <p
+                    className={`mt-2 font-mono text-sm ${
+                      product.stock <= 5
+                        ? "text-red-400"
+                        : product.stock <= 15
+                        ? "text-gold"
+                        : "text-cream/70"
+                    }`}
+                  >
+                    {product.stock} in stock
+                  </p>
+                </div>
+                <Link
+                  href={`/admin/products/${product.id}/edit`}
+                  className="rounded-full border border-cream/20 px-4 py-1.5 font-mono text-xs text-cream/60 transition hover:border-gold hover:text-gold"
                 >
-                  {product.isAvailable ? "Available" : "Hidden"}
-                </span>
-                <p
-                  className={`mt-2 font-mono text-sm ${
-                    product.stock <= 5
-                      ? "text-red-400"
-                      : product.stock <= 15
-                      ? "text-gold"
-                      : "text-cream/70"
-                  }`}
-                >
-                  {product.stock} in stock
-                </p>
+                  Edit
+                </Link>
               </div>
             </div>
 
