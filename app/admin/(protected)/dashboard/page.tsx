@@ -5,8 +5,13 @@ async function getStats() {
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
+  const dayOfWeek = now.getDay();
+  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysToMonday);
+
   const [
     todayOrders,
+    weekOrders,
     monthOrders,
     totalOrders,
     recentOrders,
@@ -14,6 +19,11 @@ async function getStats() {
   ] = await Promise.all([
     prisma.order.aggregate({
       where: { paymentStatus: "PAID", createdAt: { gte: startOfToday } },
+      _sum: { totalAmount: true },
+      _count: true,
+    }),
+    prisma.order.aggregate({
+      where: { paymentStatus: "PAID", createdAt: { gte: startOfWeek } },
       _sum: { totalAmount: true },
       _count: true,
     }),
@@ -57,6 +67,8 @@ async function getStats() {
   return {
     todaySales: todayOrders._sum.totalAmount ?? 0,
     todayCount: todayOrders._count,
+    weekSales: weekOrders._sum.totalAmount ?? 0,
+    weekCount: weekOrders._count,
     monthSales: monthOrders._sum.totalAmount ?? 0,
     monthCount: monthOrders._count,
     totalOrders,
@@ -98,12 +110,17 @@ export default async function AdminDashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {[
           {
             label: "Today's Sales",
             value: `₦${stats.todaySales.toLocaleString()}`,
             sub: `${stats.todayCount} orders`,
+          },
+          {
+            label: "This Week",
+            value: `₦${stats.weekSales.toLocaleString()}`,
+            sub: `${stats.weekCount} orders`,
           },
           {
             label: "Monthly Revenue",
