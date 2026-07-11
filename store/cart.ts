@@ -8,6 +8,7 @@ export type CartItem = {
   price: number;
   imageUrl: string | null;
   quantity: number;
+  stock: number;
 };
 
 type CartState = {
@@ -68,6 +69,8 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "crispy-munchies-cart",
+      // only persist the actual cart contents — isOpen is just UI state,
+      // we don't want the drawer popping open on every page reload
       partialize: (state) => ({ items: state.items }),
     }
   )

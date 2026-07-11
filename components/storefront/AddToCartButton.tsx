@@ -24,7 +24,7 @@ export function AddToCartButton({
   const [justAdded, setJustAdded] = useState(false);
 
   function handleClick() {
-    addItem({ productId, name, packSize, price, imageUrl });
+    addItem({ productId, name, packSize, price, imageUrl, stock });
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1200);
   }
