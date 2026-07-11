@@ -6,6 +6,8 @@ import { FreshBadge } from "../components/storefront/FreshBadge";
 import { CartButton } from "../components/storefront/CartButton";
 import { CartDrawer } from "../components/storefront/CartDrawer";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const products = await prisma.product.findMany({
     where: { isAvailable: true },
