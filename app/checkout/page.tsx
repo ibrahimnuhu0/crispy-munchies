@@ -16,20 +16,7 @@ export default function CheckoutPage() {
   const items = useCartStore((state) => state.items);
   const subtotal = useCartTotal();
 
-
   const [hydrated, setHydrated] = useState(false);
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
-
-  if (!hydrated) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-roast">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" />
-      </main>
-    );
-  }
-
   const [form, setForm] = useState({
     customerName: "",
     phone: "",
@@ -41,6 +28,11 @@ export default function CheckoutPage() {
   const [feeLoading, setFeeLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Hydration effect must come before any early returns
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   // Look up the delivery fee whenever state or city changes
   useEffect(() => {
@@ -61,6 +53,15 @@ export default function CheckoutPage() {
   }, [form.state, form.city]);
 
   const total = subtotal + (deliveryFee ?? 0);
+
+  // Now safe to return early — all hooks already called above
+  if (!hydrated) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-roast">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" />
+      </main>
+    );
+  }
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -147,10 +148,10 @@ export default function CheckoutPage() {
         <h1 className="font-display text-3xl font-bold text-cream md:text-4xl">
           Checkout
         </h1>
-        <p className="mt-2 font-sans text-sm text-cream/60">
-          No account needed — just your delivery details.
-        </p>
 
+        {/* On mobile: summary on top, form below.
+            On desktop: form left, summary right — achieved by reversing
+            the DOM order via md:flex-row-reverse on the wrapper */}
         <div className="mt-8 flex flex-col gap-10 md:flex-row-reverse md:items-start">
           {/* Order summary — appears first on mobile */}
           <aside className="w-full shrink-0 rounded-2xl bg-surface p-6 md:w-80">
