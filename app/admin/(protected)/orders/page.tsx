@@ -96,7 +96,7 @@ export default async function AdminOrdersPage() {
               </p>
 
               {order.paymentStatus === "PAID" && (
-                <div className="mt-4 flex items-center gap-3">
+                <div className="mt-4 flex flex-wrap items-center gap-3">
                   <span
                     className={`rounded-full px-3 py-1 font-mono text-xs uppercase tracking-widest ${
                       STATUS_COLORS[order.orderStatus] ?? "bg-cream/10 text-cream/60"
