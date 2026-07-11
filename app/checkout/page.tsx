@@ -16,6 +16,20 @@ export default function CheckoutPage() {
   const items = useCartStore((state) => state.items);
   const subtotal = useCartTotal();
 
+
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  if (!hydrated) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-roast">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" />
+      </main>
+    );
+  }
+
   const [form, setForm] = useState({
     customerName: "",
     phone: "",
@@ -87,6 +101,7 @@ export default function CheckoutPage() {
         return;
       }
 
+      // Step 2: initialize the Paystack transaction for that order
       const payRes = await fetch("/api/paystack/initialize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
